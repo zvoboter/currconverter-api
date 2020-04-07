@@ -6,6 +6,7 @@ const cors = require('cors');
 const axios = require('axios');
 const moment = require('moment');
 const url = require('url');
+const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(express.json());
@@ -46,8 +47,43 @@ app.get('/latest', async (req, res) => {
     } catch (error) {
         console.error(error);
 
-        res.status(404);
-        return res.send('Unknow error');
+        res.status(500);
+        return res.send();
+    }
+});
+
+
+app.post('/sendmail', async (req, res) => {
+    try {
+        const { from = email, name, phone, message } = req.body;
+        const { host, port, secure, user, pass } = JSON.parse(process.env.MAIL_INFO);
+
+        const transporter = nodemailer.createTransport({
+            host, port, secure,
+            auth: {
+                user, pass
+            }
+        });
+
+        await transporter.sendMail({
+            from,
+            to: user,
+            subject: 'New Message from Contact Form',
+            text: `Name: ${name} \n Email: ${from} \n Phone: ${phone} \n Message: ${message} `
+        }, (error, info) => {
+            if (error) {
+                res.sendStatus(403);
+                res.json(error);
+            } else {
+                res.sendStatus(200);
+                res.send();
+            }
+        });
+    } catch (error) {
+        console.error(error);
+
+        res.status(500);
+        return res.send();
     }
 });
 
