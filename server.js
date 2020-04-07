@@ -55,7 +55,7 @@ app.get('/latest', async (req, res) => {
 
 app.post('/sendmail', async (req, res) => {
     try {
-        const { from = email, name, phone, message } = req.body;
+        const { email, name, phone, message } = req.body;
         const { host, port, secure, user, pass } = JSON.parse(process.env.MAIL_INFO);
 
         const transporter = nodemailer.createTransport({
@@ -66,10 +66,10 @@ app.post('/sendmail', async (req, res) => {
         });
 
         await transporter.sendMail({
-            from,
+            from: email,
             to: user,
             subject: 'New Message from Contact Form',
-            text: `Name: ${name} \n Email: ${from} \n Phone: ${phone} \n Message: ${message} `
+            text: `Name: ${name} \n Email: ${email} \n Phone: ${phone} \n Message: ${message} `
         }, (error, info) => {
             if (error) {
                 res.sendStatus(403);
